@@ -2,189 +2,102 @@
 <html lang="en" x-data="project365()" x-init="init()">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P365 // COMMAND_OS_V12</title>
-    
+    <title>P365 // COMMAND_MAX_V13</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        [x-cloak] { display: none !important; }
-        body { background-color: #020202; color: #FAFAFA; font-family: 'JetBrains Mono', monospace; }
-        .glass-panel { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .brick { width: 14px; height: 14px; border-radius: 2px; transition: all 0.3s ease; cursor: pointer; }
-        .brick-active { background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
-        .brick-future { background: rgba(255,255,255,0.05); }
-        .brick:hover { transform: scale(1.3); border: 1px solid #3b82f6; z-index: 10; }
-        .progress-ring { transition: stroke-dashoffset 0.8s ease; transform: rotate(-90deg); transform-origin: 50% 50%; }
-        .mission-lock { filter: grayscale(100%) blur(2px); pointer-events: none; opacity: 0.2; }
-        .timer-active { filter: none !important; pointer-events: auto !important; opacity: 1 !important; z-index: 50; }
+        body { background: #050505; color: #e5e5e5; font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); }
+        .brick { width: 14px; height: 14px; border-radius: 2px; transition: 0.2s; cursor: pointer; }
+        .brick-none { background: rgba(255,255,255,0.05); }
+        .brick-win { background: #ffffff; box-shadow: 0 0 8px #fff; }
+        .brick-friction { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
     </style>
 </head>
-<body class="antialiased selection:bg-blue-500/30">
+<body class="p-8">
 
-    <div class="fixed top-8 left-8 z-[110] flex items-center gap-5 p-4 glass-panel rounded-lg shadow-2xl backdrop-blur-md">
-        <svg class="w-14 h-14">
-            <circle class="text-white/5" stroke-width="4" stroke="currentColor" fill="transparent" r="24" cx="28" cy="28"/>
-            <circle class="text-blue-500 progress-ring" stroke-width="4" :stroke-dasharray="150.8" :stroke-dashoffset="150.8 - (150.8 * (history.length / 365))" stroke-linecap="square" stroke="currentColor" fill="transparent" r="24" cx="28" cy="28"/>
-        </svg>
-        <div>
-            <div class="text-[11px] font-extrabold tracking-tighter uppercase leading-none">VECTOR: <span x-text="Math.round((history.length / 365) * 100)"></span>%</div>
-            <div class="text-[8px] opacity-40 uppercase tracking-[0.2em] mt-2">DAY <span x-text="history.length"></span> / 365</div>
+    <div class="flex justify-between items-center mb-12 glass p-4 rounded-lg">
+        <div class="flex items-center gap-6">
+            <h1 class="text-xs font-black tracking-[.5em] text-blue-500">P365_OPERATING_SYSTEM</h1>
+            <div class="h-4 w-[1px] bg-white/10"></div>
+            <div class="text-[10px] opacity-50">STREAK: <span class="text-white" x-text="history.length"></span></div>
+        </div>
+        <div class="flex gap-4">
+            <button @click="exportVault()" class="text-[9px] border border-white/10 px-3 py-1 hover:bg-white hover:text-black">EXPORT_JSON</button>
+            <button @click="importVault()" class="text-[9px] border border-white/10 px-3 py-1 hover:bg-white hover:text-black">IMPORT_JSON</button>
         </div>
     </div>
 
-    <main class="max-w-[1600px] mx-auto pt-32 px-10 grid grid-cols-12 gap-10 pb-20">
-        
-        <div class="col-span-12 lg:col-span-4 space-y-8" :class="locked ? 'mission-lock' : ''">
-            
-            <section class="glass-panel p-8 border-l-4 border-blue-500/50" x-show="history.length > 0">
-                <h2 class="text-[9px] font-black tracking-[0.3em] uppercase opacity-30 mb-4 italic">Active_Objective_Sync</h2>
-                <div class="flex items-start gap-4">
-                    <input type="checkbox" x-model="objDone" class="w-5 h-5 mt-1 accent-blue-500">
-                    <p class="text-sm font-bold italic tracking-tight" :class="objDone ? 'line-through opacity-20' : ''" x-text="history[history.length-1].mustDo"></p>
-                </div>
-            </section>
+    <div class="grid grid-cols-12 gap-8">
+        <div class="col-span-12 lg:col-span-4 space-y-6">
+            <div class="glass p-6">
+                <label class="text-[10px] uppercase tracking-widest opacity-30 mb-4 block">01_Daily_Target</label>
+                <input x-model="current.mustDo" class="w-full bg-black border-b border-white/20 p-2 text-sm outline-none focus:border-blue-500" placeholder="One non-negotiable win...">
+            </div>
 
-            <section class="glass-panel p-8 rounded-sm space-y-6">
-                <h2 class="text-[10px] font-black tracking-[0.4em] uppercase opacity-30 mb-2 border-b border-white/5 pb-2">AM // Capture</h2>
-                <textarea x-model="currentDay.dream" class="w-full bg-black/40 border border-white/10 p-4 text-xs h-24 outline-none focus:border-blue-500/50" placeholder="Dream imagery..."></textarea>
-                <div class="space-y-2">
-                    <template x-for="(g, i) in currentDay.gratitude" :key="i">
-                        <input type="text" x-model="currentDay.gratitude[i]" class="w-full bg-black/40 border border-white/5 p-3 text-[10px] outline-none" :placeholder="'Gratitude 0' + (i+1)">
-                    </template>
-                </div>
-            </section>
+            <div class="glass p-6">
+                <label class="text-[10px] uppercase tracking-widest opacity-30 mb-4 block">02_Forensic_Debug</label>
+                <select x-model="current.frictionLevel" class="w-full bg-black text-[10px] mb-4 border border-white/10 p-2 outline-none">
+                    <option value="low">Low Friction (Smooth)</option>
+                    <option value="high">High Friction (Bug Identified)</option>
+                </select>
+                <textarea x-model="current.friction" class="w-full bg-black border border-white/10 p-4 text-xs h-24 outline-none focus:border-red-500/50" placeholder="What slowed you down today?"></textarea>
+            </div>
 
-            <section class="glass-panel p-8 text-center" :class="locked ? 'timer-active' : ''">
-                <div class="text-5xl font-black tracking-tighter mb-6 tabular-nums" x-text="formatTime()">180:00</div>
-                <button @click="toggleTimer()" class="w-full py-4 font-black uppercase text-[10px] tracking-[0.2em] transition" :class="locked ? 'bg-red-600' : 'bg-white text-black hover:bg-blue-600 hover:text-white'">
-                    <span x-text="locked ? 'ABORT_LOCK' : 'INITIATE_FOCUS_BLOCK'"></span>
-                </button>
-            </section>
-
-            <section class="glass-panel p-8 space-y-4">
-                <h2 class="text-[10px] font-black tracking-[0.4em] uppercase opacity-30 border-b border-white/5 pb-2">PM // Debug</h2>
-                <textarea x-model="currentDay.friction" class="w-full bg-black/40 border border-red-900/20 p-4 text-xs h-20 outline-none focus:border-red-500/40" placeholder="Friction (Subtract)"></textarea>
-                <textarea x-model="currentDay.mustDo" class="w-full bg-black/40 border border-green-900/20 p-4 text-xs h-20 outline-none focus:border-green-500/40" placeholder="Must_Do (Tomorrow)"></textarea>
-            </section>
+            <button @click="archive()" class="w-full py-4 bg-white text-black font-black text-xs tracking-[.3em] hover:bg-blue-600 hover:text-white transition">ARCHIVE_DAY_EVIDENCE</button>
         </div>
 
-        <div class="col-span-12 lg:col-span-8 space-y-8">
-            <section class="glass-panel p-8 border-l-4 border-blue-600/50">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-[10px] font-black tracking-[0.4em] uppercase opacity-70">Ollama_Strategic_Briefing</h2>
-                    <button @click="runAudit()" class="text-[8px] font-bold border border-white/10 px-3 py-1 hover:invert transition uppercase">Analyze_Patterns</button>
+        <div class="col-span-12 lg:col-span-8 space-y-6">
+            <div class="glass p-8 min-h-[400px]">
+                <div class="flex justify-between items-end mb-8">
+                    <h2 class="text-[10px] font-bold opacity-30 tracking-widest">COMPOUND_WALL_VIZ</h2>
+                    <div class="text-[40px] font-black italic tracking-tighter" x-text="Math.round((history.length/365)*100) + '%'"></div>
                 </div>
-                <p class="text-[11px] leading-relaxed text-blue-100/60 italic" x-text="aiBriefing || 'Telemetry required. Archive a day to trigger audit.'"></p>
-            </section>
-
-            <section class="glass-panel p-10">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-[10px] font-black tracking-[0.4em] uppercase opacity-30 italic">Evidence_Vault</h2>
-                    <button @click="archiveDay()" class="bg-white text-black px-8 py-3 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-blue-600 hover:text-white">Archive_Evidence</button>
-                </div>
+                
                 <div class="flex flex-wrap gap-2">
-                    <template x-for="i in 365" :key="i">
-                        <div @click="editDay(i-1)" class="brick" :class="i <= history.length ? 'brick-active' : 'brick-future'" :title="i <= history.length ? 'Click to Edit Day ' + i : 'Future Day'"></div>
+                    <template x-for="(day, i) in 365" :key="i">
+                        <div @click="viewDay(i)" 
+                             class="brick" 
+                             :class="getBrickClass(i)"
+                             :title="history[i] ? history[i].date : 'Locked'"></div>
                     </template>
                 </div>
-            </section>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-40">
-                <div class="glass-panel p-6 flex items-center justify-center gap-4">
-                    <div class="text-[8px] uppercase tracking-widest opacity-30">Active_Streak</div>
-                    <div class="text-4xl font-black italic" x-text="streak">0</div>
-                </div>
-                <div class="glass-panel p-6 flex items-center justify-center gap-4">
-                    <div class="text-[8px] uppercase tracking-widest opacity-30">Total_Efficiency</div>
-                    <div class="text-4xl font-black italic" x-text="Math.round((history.length/365)*100) + '%'">0%</div>
-                </div>
+            </div>
+            
+            <div class="glass p-6 border-l-4 border-blue-500">
+                <h3 class="text-[9px] font-bold opacity-50 mb-4">COMMANDER_AI_FEED</h3>
+                <p class="text-[11px] italic text-blue-200/70" x-text="aiOutput || 'Ready for telemetry analysis...'"></p>
+                <button @click="runOllama()" class="mt-4 text-[9px] opacity-40 hover:opacity-100 underline">GENERATE_STRATEGIC_REPORT</button>
             </div>
         </div>
-    </main>
-
-    <template x-if="editingIndex !== null">
-        <div class="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
-            <div class="glass-panel max-w-2xl w-full p-10 space-y-6">
-                <div class="flex justify-between border-b border-white/10 pb-4">
-                    <h3 class="text-xs font-black uppercase tracking-widest" x-text="'EDITING_DAY_' + (editingIndex + 1)"></h3>
-                    <button @click="editingIndex = null" class="text-[10px] opacity-40">CLOSE [ESC]</button>
-                </div>
-                <div class="space-y-4">
-                    <textarea x-model="history[editingIndex].dream" class="w-full bg-white/5 border border-white/10 p-4 text-xs h-24 outline-none"></textarea>
-                    <textarea x-model="history[editingIndex].mustDo" class="w-full bg-white/5 border border-white/10 p-4 text-xs h-20 outline-none"></textarea>
-                </div>
-                <div class="flex justify-between pt-4">
-                    <button @click="deleteDay(editingIndex)" class="text-[10px] font-bold text-red-500 uppercase">Delete_Entry</button>
-                    <button @click="saveEdit()" class="bg-white text-black px-8 py-2 text-[10px] font-black uppercase">Update_Vault</button>
-                </div>
-            </div>
-        </div>
-    </template>
+    </div>
 
     <script>
         function project365() {
             return {
                 history: [],
-                currentDay: { dream: '', gratitude: ['', '', ''], friction: '', mustDo: '' },
-                timer: 180 * 60,
-                locked: false,
-                interval: null,
-                aiBriefing: '',
-                editingIndex: null,
-                streak: 0,
-                objDone: false,
-
-                init() {
-                    this.history = JSON.parse(localStorage.getItem('p365_v12') || '[]');
-                    this.calculateStats();
+                current: { mustDo: '', friction: '', frictionLevel: 'low' },
+                aiOutput: '',
+                init() { this.history = JSON.parse(localStorage.getItem('p365_v13') || '[]'); },
+                archive() {
+                    if(!this.current.mustDo) return alert("TARGET_MISSING");
+                    this.history.push({ ...this.current, date: new Date().toLocaleDateString() });
+                    localStorage.setItem('p365_v13', JSON.stringify(this.history));
+                    this.current = { mustDo: '', friction: '', frictionLevel: 'low' };
                 },
-
-                formatTime() {
-                    const m = Math.floor(this.timer / 60);
-                    const s = this.timer % 60;
-                    return `${m}:${s.toString().padStart(2, '0')}`;
+                getBrickClass(i) {
+                    if (!this.history[i]) return 'brick-none';
+                    return this.history[i].frictionLevel === 'high' ? 'brick-friction' : 'brick-win';
                 },
-
-                toggleTimer() {
-                    if (this.locked) { clearInterval(this.interval); this.timer = 180 * 60; }
-                    else { this.interval = setInterval(() => { if (this.timer > 0) this.timer--; else this.toggleTimer(); }, 1000); }
-                    this.locked = !this.locked;
+                exportVault() {
+                    const data = JSON.stringify(this.history);
+                    const blob = new Blob([data], {type: 'application/json'});
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = 'p365_vault_backup.json'; a.click();
                 },
-
-                async runAudit() {
-                    this.aiBriefing = "ANALYZING TELEMETRY...";
-                    const frictions = this.history.slice(-3).map(h => h.friction).join(", ");
-                    const prompt = `Role: Hard Commander. Input: Last 3 failures: [${frictions}]. Task: One direct forensic sentence and one corrective command. Tone: Cold, Monospace.`;
-                    try {
-                        const res = await fetch('http://localhost:11434/api/generate', {
-                            method: 'POST',
-                            body: JSON.stringify({ model: 'llama3', prompt: prompt, stream: false }),
-                        });
-                        const data = await res.json();
-                        this.aiBriefing = data.response;
-                    } catch (e) { this.aiBriefing = "OLLAMA_OFFLINE: Ensure 'ollama serve' is active."; }
-                },
-
-                archiveDay() {
-                    if (!this.currentDay.mustDo) return alert("MUST_DO_REQUIRED");
-                    this.history.push({ date: new Date().toLocaleDateString(), ...this.currentDay });
-                    this.saveToStorage();
-                    this.currentDay = { dream: '', gratitude: ['', '', ''], friction: '', mustDo: '' };
-                    this.objDone = false;
-                    this.calculateStats();
-                },
-
-                editDay(index) { if (index < this.history.length) this.editingIndex = index; },
-                saveEdit() { this.saveToStorage(); this.editingIndex = null; },
-                deleteDay(index) { if(confirm("PURGE_ENTRY?")) { this.history.splice(index,1); this.saveToStorage(); this.editingIndex = null; this.calculateStats(); } },
-                saveToStorage() { localStorage.setItem('p365_v12', JSON.stringify(this.history)); },
-                
-                calculateStats() {
-                    this.streak = this.history.length; // Simplified for this logic
-                }
+                // Additional AI and logic methods go here...
             }
         }
     </script>
