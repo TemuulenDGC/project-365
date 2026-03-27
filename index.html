@@ -2,154 +2,130 @@
 <html lang="en" x-data="project365()" x-init="init()">
 <head>
     <meta charset="UTF-8">
-    <title>PROJECT 365 // OS</title>
+    <title>P365 // STRATEGIC ADVISOR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; transition: all 0.5s ease; }
-        .glass { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); }
-        .brick { width: 10px; height: 10px; border-radius: 2px; transition: all 0.3s; }
-        .active-brick { background: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.5); }
+        body { background: #020202; color: #fff; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); backdrop-blur: 20px; }
+        .progress-ring { transition: stroke-dashoffset 0.5s ease; transform: rotate(-90deg); transform-origin: 50% 50%; }
+        .ai-glow { box-shadow: 0 0 20px rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); }
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="antialiased">
+<body class="antialiased selection:bg-blue-500/30">
 
-    <template x-if="!settings.active">
-        <div class="fixed inset-0 z-[100] bg-black flex items-center justify-center p-6">
-            <div class="max-w-md w-full space-y-8 text-center">
-                <h1 class="text-4xl font-black italic tracking-tighter">INITIATE CONTRACT.</h1>
-                <p class="opacity-40 text-xs tracking-widest uppercase">Define your $n^{1.1}$ Parameters</p>
-                <div class="space-y-4">
-                    <input type="number" x-model="settings.totalDays" placeholder="Duration (e.g. 365)" class="w-full bg-white/5 border border-white/10 p-4 outline-none focus:border-white/40">
-                    <input type="text" x-model="settings.userName" placeholder="Your Name" class="w-full bg-white/5 border border-white/10 p-4 outline-none focus:border-white/40">
-                    <button @click="startProject()" class="w-full py-4 bg-white text-black font-black uppercase text-xs tracking-[0.3em] hover:invert transition">Begin Operation</button>
-                </div>
-            </div>
+    <div class="fixed top-6 left-6 z-[110] flex items-center gap-4 glass p-3 pr-6 rounded-full">
+        <svg class="w-12 h-12">
+            <circle class="text-white/5" stroke-width="4" stroke="currentColor" fill="transparent" r="20" cx="24" cy="24"/>
+            <circle class="text-blue-500 progress-ring" stroke-width="4" :stroke-dasharray="125.6" :stroke-dashoffset="125.6 - (125.6 * (history.length / settings.totalDays))" stroke-linecap="round" stroke="currentColor" fill="transparent" r="20" cx="24" cy="24"/>
+        </svg>
+        <div>
+            <div class="text-[10px] font-black uppercase tracking-tighter leading-none" x-text="Math.round((history.length / settings.totalDays)*100) + '% COMPLETE'"></div>
+            <div class="text-[8px] opacity-40 uppercase tracking-widest mt-1">Global Vector</div>
         </div>
-    </template>
-
-    <div x-show="settings.active" x-cloak>
-        <nav class="fixed top-0 w-full p-6 glass backdrop-blur-xl z-50 flex justify-between items-center">
-            <div>
-                <span class="font-black italic text-xl underline decoration-white/20" x-text="'P' + settings.totalDays"></span>
-                <span class="ml-4 text-[10px] opacity-30 font-bold uppercase tracking-widest" x-text="settings.userName"></span>
-            </div>
-            <div class="flex gap-4 items-center">
-                <div class="text-[10px] font-bold opacity-50 uppercase tracking-widest">Efficiency: <span class="text-white" x-text="efficiency + '%'"></span></div>
-                <button @click="resetAll()" class="text-[8px] opacity-20 hover:opacity-100 uppercase font-bold tracking-widest">Hard Reset</button>
-            </div>
-        </nav>
-
-        <main class="pt-32 px-6 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 pb-24">
-            
-            <div class="lg:col-span-7 space-y-8">
-                <section class="glass p-8 rounded-lg space-y-6">
-                    <h2 class="text-[10px] font-black tracking-[0.4em] uppercase opacity-30 italic border-b border-white/5 pb-4">Morning Protocol</h2>
-                    <div class="space-y-4">
-                        <textarea x-model="dailyData.dream" @input="save()" class="w-full bg-white/5 border border-white/5 p-4 text-sm outline-none focus:border-white/20 h-24" placeholder="Subconscious Dream Log..."></textarea>
-                        <div class="grid grid-cols-1 gap-2">
-                            <input type="text" x-model="dailyData.gratitude[0]" @input="save()" class="bg-white/5 border border-white/5 p-3 text-sm outline-none" placeholder="Gratitude 01">
-                            <input type="text" x-model="dailyData.gratitude[1]" @input="save()" class="bg-white/5 border border-white/5 p-3 text-sm outline-none" placeholder="Gratitude 02">
-                            <input type="text" x-model="dailyData.gratitude[2]" @input="save()" class="bg-white/5 border border-white/5 p-3 text-sm outline-none" placeholder="Gratitude 03">
-                        </div>
-                    </div>
-                </section>
-
-                <section class="glass p-8 rounded-lg space-y-6">
-                    <h2 class="text-[10px] font-black tracking-[0.4em] uppercase opacity-30 italic border-b border-white/5 pb-4">Evening Audit</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <textarea x-model="dailyData.dontDo" @input="save()" class="w-full bg-white/5 border border-red-500/10 p-4 text-xs outline-none focus:border-red-500/20 h-24" placeholder="NOT to do tomorrow..."></textarea>
-                        <textarea x-model="dailyData.mustDo" @input="save()" class="w-full bg-white/5 border border-green-500/10 p-4 text-xs outline-none focus:border-green-500/20 h-24" placeholder="MUST do tomorrow..."></textarea>
-                    </div>
-                </section>
-            </div>
-
-            <div class="lg:col-span-5 space-y-8">
-                <section class="glass p-8 rounded-lg">
-                    <h2 class="text-[10px] font-black tracking-[0.4em] uppercase opacity-30 italic mb-6">The Brick Wall [00:04:16]</h2>
-                    <div class="flex flex-wrap gap-1">
-                        <template x-for="i in parseInt(settings.totalDays)">
-                            <div class="brick" :class="i <= history.length ? 'active-brick' : 'bg-white/5'"></div>
-                        </template>
-                    </div>
-                    <div class="mt-8 border-t border-white/5 pt-6 flex justify-between items-center">
-                        <div>
-                            <div class="text-4xl font-black italic" x-text="history.length"></div>
-                            <div class="text-[8px] uppercase tracking-widest opacity-30">Total Wins Stacked</div>
-                        </div>
-                        <button @click="endDay()" class="px-6 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest hover:scale-105 transition">Archive Day</button>
-                    </div>
-                </section>
-
-                <section class="glass p-8 rounded-lg">
-                    <h2 class="text-[10px] font-black tracking-[0.4em] uppercase opacity-30 italic mb-4">Identity Map</h2>
-                    <div class="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scroll">
-                        <template x-for="log in history.slice().reverse()">
-                            <div class="p-4 border border-white/5 mb-2 text-[10px] opacity-40 hover:opacity-100 transition">
-                                <span class="block font-bold mb-1" x-text="log.date"></span>
-                                <span x-text="'Dream: ' + log.dream.substring(0,30) + '...'"></span>
-                            </div>
-                        </template>
-                    </div>
-                </section>
-            </div>
-        </main>
     </div>
+
+    <main class="pt-32 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24">
+        
+        <div class="lg:col-span-4 space-y-6">
+            <section class="glass ai-glow p-8 rounded-2xl sticky top-32">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+                    <h2 class="text-xs font-black tracking-[0.3em] uppercase opacity-70">AI Strategic Layer</h2>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="p-4 bg-blue-500/5 border border-blue-500/20 rounded-lg text-xs leading-relaxed italic text-blue-100/80">
+                        <span x-text="aiInsight || 'Analyzing current trajectory... Archive a day to generate insight.'"></span>
+                    </div>
+                    
+                    <button @click="generateAIInsight()" class="w-full py-3 bg-blue-600 text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 transition shadow-lg shadow-blue-900/20">
+                        Run Pattern Audit
+                    </button>
+
+                    <div class="pt-6 border-t border-white/5 space-y-4">
+                        <div class="flex justify-between text-[9px] uppercase tracking-widest opacity-40">
+                            <span>Compounding Rate</span>
+                            <span class="text-blue-400">1.1x</span>
+                        </div>
+                        <div class="flex justify-between text-[9px] uppercase tracking-widest opacity-40">
+                            <span>Identity Stability</span>
+                            <span x-text="efficiency + '%'"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="lg:col-span-8 space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <section class="glass p-8 rounded-2xl space-y-4">
+                    <h3 class="text-[10px] font-black tracking-widest uppercase opacity-30 italic">Subconscious</h3>
+                    <textarea x-model="dailyData.dream" class="w-full bg-white/5 border border-white/5 p-4 text-xs outline-none focus:border-white/20 h-32" placeholder="Dream record..."></textarea>
+                </section>
+                <section class="glass p-8 rounded-2xl space-y-4">
+                    <h3 class="text-[10px] font-black tracking-widest uppercase opacity-30 italic">Friction Audit</h3>
+                    <textarea x-model="dailyData.dontDo" class="w-full bg-white/5 border border-red-500/10 p-4 text-xs outline-none focus:border-red-500/20 h-32" placeholder="What to SUBTRACT tomorrow..."></textarea>
+                </section>
+            </div>
+
+            <section class="glass p-8 rounded-2xl">
+                <div class="flex justify-between items-end mb-8">
+                    <h2 class="text-xs font-black tracking-[0.4em] uppercase opacity-30 italic">Permanent Win Gallery</h2>
+                    <button @click="endDay()" class="px-8 py-3 bg-white text-black font-black text-[10px] uppercase tracking-widest hover:invert transition">Archive Evidence</button>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                    <template x-for="i in parseInt(settings.totalDays)">
+                        <div class="w-3 h-3 rounded-sm transition-all duration-500" :class="i <= history.length ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.2)]' : 'bg-white/5'"></div>
+                    </template>
+                </div>
+            </section>
+        </div>
+    </main>
 
     <script>
         function project365() {
             return {
-                settings: { active: false, totalDays: 365, userName: '' },
+                settings: { active: true, totalDays: 365, userName: 'Temuulen' },
                 dailyData: { dream: '', gratitude: ['', '', ''], dontDo: '', mustDo: '' },
                 history: [],
                 efficiency: 0,
+                aiInsight: '',
 
                 init() {
-                    const s = localStorage.getItem('p365_settings');
                     const h = localStorage.getItem('p365_history');
-                    if (s) this.settings = JSON.parse(s);
                     if (h) this.history = JSON.parse(h);
                     this.calculateEfficiency();
                 },
 
-                startProject() {
-                    if (this.settings.totalDays > 0) {
-                        this.settings.active = true;
-                        localStorage.setItem('p365_settings', JSON.stringify(this.settings));
-                    }
-                },
-
-                save() {
-                    localStorage.setItem('p365_current_day', JSON.stringify(this.dailyData));
-                },
-
                 endDay() {
-                    const entry = {
-                        date: new Date().toLocaleDateString(),
-                        ...this.dailyData
-                    };
-                    this.history.push(entry);
+                    if(!this.dailyData.mustDo && !this.dailyData.dream) return alert("Log evidence before archiving.");
+                    this.history.push({ date: new Date().toLocaleDateString(), ...this.dailyData });
                     localStorage.setItem('p365_history', JSON.stringify(this.history));
-                    
-                    // Reset for next day
                     this.dailyData = { dream: '', gratitude: ['', '', ''], dontDo: '', mustDo: '' };
-                    this.save();
                     this.calculateEfficiency();
+                    this.generateAIInsight();
+                },
+
+                generateAIInsight() {
+                    if (this.history.length < 1) {
+                        this.aiInsight = "Insufficient data. Stack your first brick to begin the audit.";
+                        return;
+                    }
+                    const lastEntry = this.history[this.history.length - 1];
+                    const insights = [
+                        `Identity shift detected. Your focus on '${lastEntry.mustDo.substring(0,15)}...' is compounding.`,
+                        "Pattern Alert: Your 'Don't Do' list suggests a recurring friction in deep work blocks.",
+                        "Subconscious Audit: Dream themes indicate high cognitive processing. Maintain 180m protocol.",
+                        "Efficiency is optimal. The asymptote is nearing. Do not break the chain."
+                    ];
+                    this.aiInsight = insights[Math.floor(Math.random() * insights.length)];
                 },
 
                 calculateEfficiency() {
-                    if (this.history.length === 0) return;
-                    // Logic: Bricks divided by days passed since start
-                    this.efficiency = Math.round((this.history.length / this.settings.totalDays) * 100);
-                },
-
-                resetAll() {
-                    if(confirm("Destroy all progress and reset contract?")) {
-                        localStorage.clear();
-                        window.location.reload();
-                    }
+                    this.efficiency = Math.round((this.history.length / 365) * 100);
                 }
             }
         }
