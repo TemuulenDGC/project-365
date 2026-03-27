@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project 365 | (n)1.1</title>
+    <title>Project 365 | OS v1.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.min.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { obsidian: '#050505', chalk: '#FAFAFA', graphite: '#121212' },
+                    colors: { obsidian: '#050505', chalk: '#FAFAFA', accent: '#3b82f6' },
                     fontFamily: { serif: ['Instrument Serif', 'serif'], sans: ['Inter', 'sans-serif'] }
                 }
             }
@@ -21,102 +21,143 @@
     </script>
 
     <style>
+        [x-cloak] { display: none !important; }
         body { background-color: #050505; color: #FAFAFA; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
-        .hero-gradient { background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #050505 100%); }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        
-        /* Subtle "Scanline" effect for texture */
-        .scanlines::after {
-            content: "";
-            position: fixed; inset: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-            background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 100; opacity: 0.3;
-        }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .hero-glow { background: radial-gradient(circle at 50% 50%, #111 0%, #050505 100%); }
+        .progress-ring { transition: stroke-dashoffset 0.35s; transform: rotate(-90deg); transform-origin: 50% 50%; }
     </style>
 </head>
-<body class="scanlines">
+<body class="hero-glow font-sans selection:bg-white selection:text-black">
 
-    <section class="hero-gradient min-h-screen flex flex-col items-center justify-center text-center px-6"
-             x-data="{ visible: false }" x-init="setTimeout(() => visible = true, 200)">
-        
-        <div x-show="visible" x-transition:enter="transition ease-out duration-1000"
-             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
-            
-            <span class="text-[10px] tracking-[0.8em] uppercase opacity-30 font-bold mb-6 block">The Exponential Variable</span>
-            
-            <h1 class="font-serif text-[25vw] md:text-[18vw] leading-none tracking-tighter italic">
-                n<sup class="not-italic opacity-50 font-sans text-[10vw] md:text-[8vw]">1.1</sup>
+    <nav class="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center glass border-b border-white/5" 
+         x-data="{ 
+            start: new Date('2026-01-01'), 
+            today: new Date(),
+            get day() { return Math.floor((this.today - this.start) / (1000 * 60 * 60 * 24)) }
+         }">
+        <div class="font-serif italic text-xl tracking-tighter">P365/OS</div>
+        <div class="flex items-center space-x-6 text-[10px] tracking-[0.3em] uppercase font-bold text-gray-400">
+            <span>Day <span class="text-white" x-text="day"></span> / 365</span>
+            <div class="w-32 h-[2px] bg-white/10 relative overflow-hidden">
+                <div class="absolute h-full bg-white transition-all duration-1000" :style="`width: ${(day/365)*100}%`"></div >
+            </div>
+            <span x-text="Math.round((day/365)*100) + '%'"></span>
+        </div>
+    </nav>
+
+    <section class="min-h-screen flex flex-col items-center justify-center pt-20">
+        <div class="text-center space-y-4">
+            <h1 class="font-serif text-[22vw] md:text-[16vw] leading-none tracking-tighter italic opacity-90">
+                n<sup class="not-italic opacity-30 font-sans text-[8vw] md:text-[6vw]">1.1</sup>
             </h1>
+            <p class="text-xs tracking-[0.6em] uppercase text-gray-500 font-semibold">The Asymptotic Drive</p>
+        </div>
+        
+        <div class="mt-20 glass p-8 rounded-2xl w-full max-w-sm text-center" 
+             x-data="{ 
+                timer: 180 * 60, 
+                running: false, 
+                interval: null,
+                formatTime() {
+                    let m = Math.floor(this.timer / 60);
+                    let s = this.timer % 60;
+                    return `${m}:${s < 10 ? '0' : ''}${s}`;
+                },
+                toggle() {
+                    if (this.running) { clearInterval(this.interval); }
+                    else { this.interval = setInterval(() => { if(this.timer > 0) this.timer-- }, 1000); }
+                    this.running = !this.running;
+                }
+             }">
+            <h4 class="text-[9px] tracking-[0.3em] uppercase mb-6 text-gray-500">Deep Work Protocol (180m)</h4>
+            <div class="text-5xl font-serif mb-8 tabular-nums" x-text="formatTime()">180:00</div>
+            <button @click="toggle()" 
+                    class="w-full py-4 text-[10px] tracking-widest uppercase font-bold border border-white/20 hover:bg-white hover:text-black transition-all"
+                    x-text="running ? 'Pause Session' : 'Initiate Block'">
+            </button>
+        </div>
+    </section>
 
-            <div class="mt-12 max-w-xl mx-auto space-y-6">
-                <p class="font-sans text-lg md:text-xl font-light text-gray-400 leading-relaxed">
-                    A commitment to the asymptote. <br>Building the evidence for an identity that cannot fail.
+    <section class="py-40 px-6 md:px-24 bg-white text-black">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20">
+            <div>
+                <h2 class="font-serif text-8xl leading-none tracking-tighter mb-12">Linear vs.<br><i>Exponential.</i></h2>
+                <p class="text-xl font-light text-gray-600 leading-relaxed mb-8">
+                    $1.01^{365} = 37.7$
                 </p>
-                <div class="pt-8 flex justify-center space-x-12 opacity-40 text-[10px] tracking-widest uppercase font-bold">
-                    <span>Atomic Habits</span>
-                    <span>/</span>
-                    <span>Compound Effect</span>
-                    <span>/</span>
-                    <span>365 Days</span>
+                <p class="text-gray-500">
+                    Linearity is a trap for the impatient. Project 365 monitors the <b>marginal gains</b> that others ignore. 1% is a decision; 37x is a destiny.
+                </p>
+            </div>
+            
+            <div class="space-y-4">
+                <h4 class="text-[10px] tracking-widest uppercase font-bold mb-8">The Stack / Integration</h4>
+                <div class="p-6 border border-black/10 flex justify-between items-center group hover:bg-black hover:text-white transition-all cursor-crosshair">
+                    <div>
+                        <span class="block font-bold">Notion / Operating System</span>
+                        <span class="text-xs opacity-50">Monitoring & Logistical Planning</span>
+                    </div>
+                    <span class="font-serif italic">01</span>
+                </div>
+                <div class="p-6 border border-black/10 flex justify-between items-center group hover:bg-black hover:text-white transition-all cursor-crosshair">
+                    <div>
+                        <span class="block font-bold">Obsidian / Second Brain</span>
+                        <span class="text-xs opacity-50">Permanent Knowledge Evidence</span>
+                    </div>
+                    <span class="font-serif italic">02</span>
+                </div>
+                <div class="p-6 border border-black/10 flex justify-between items-center group hover:bg-black hover:text-white transition-all cursor-crosshair">
+                    <div>
+                        <span class="block font-bold">Endel / Neuro-Flow</span>
+                        <span class="text-xs opacity-50">Auditory focus environment</span>
+                    </div>
+                    <span class="font-serif italic">03</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="py-40 px-10 md:px-24 bg-chalk text-obsidian overflow-hidden">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
-                <div class="relative">
-                    <h2 class="font-serif text-8xl md:text-[10rem] leading-[0.85] tracking-tighter">
-                        Latent <br><i>Potential.</i>
-                    </h2>
-                    <div class="absolute -top-10 -left-10 text-[15rem] opacity-[0.03] font-serif italic select-none">365</div>
+    <section class="py-40 px-6 md:px-24">
+        <div class="mb-20">
+            <h3 class="font-serif text-6xl italic">The Library.</h3>
+            <p class="text-gray-500 text-xs tracking-[0.4em] uppercase mt-4">Required Reading for the 1.1%</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="glass p-8 flex flex-col justify-between h-64 hover:border-white/40 transition-all">
+                <span class="text-[10px] opacity-30 font-bold uppercase">Systems</span>
+                <div>
+                    <p class="font-serif text-2xl italic">Atomic Habits</p>
+                    <p class="text-[10px] opacity-40 mt-2">James Clear</p>
                 </div>
-                
-                <div class="space-y-8 border-l border-obsidian/10 pl-12 py-4">
-                    <p class="text-2xl font-light leading-snug">
-                        Most people fail because they stop at the <span class="italic font-serif">linear expectations line.</span>
-                    </p>
-                    <p class="text-gray-500 font-sans leading-relaxed">
-                        Project 365 is designed to survive the "Valley of Disappointment." By the time the curve turns vertical at day 120, your habits are no longer powered by willpower—they are your identity.
-                    </p>
+            </div>
+            <div class="glass p-8 flex flex-col justify-between h-64 hover:border-white/40 transition-all">
+                <span class="text-[10px] opacity-30 font-bold uppercase">Momentum</span>
+                <div>
+                    <p class="font-serif text-2xl italic">The Compound Effect</p>
+                    <p class="text-[10px] opacity-40 mt-2">Darren Hardy</p>
+                </div>
+            </div>
+            <div class="glass p-8 flex flex-col justify-between h-64 hover:border-white/40 transition-all">
+                <span class="text-[10px] opacity-30 font-bold uppercase">Strategy</span>
+                <div>
+                    <p class="font-serif text-2xl italic">The 1% Rule</p>
+                    <p class="text-[10px] opacity-40 mt-2">Tommy Baker</p>
+                </div>
+            </div>
+            <div class="glass p-8 flex flex-col justify-between h-64 hover:border-white/40 transition-all">
+                <span class="text-[10px] opacity-30 font-bold uppercase">Subtraction</span>
+                <div>
+                    <p class="font-serif text-2xl italic">Essentialism</p>
+                    <p class="text-[10px] opacity-40 mt-2">Greg McKeown</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="py-40 px-10 md:px-24 border-t border-white/5">
-        <div class="max-w-7xl mx-auto">
-            <div class="mb-24">
-                <h3 class="font-serif text-6xl italic">The 120 Protocols.</h3>
-                <p class="text-gray-500 mt-4 tracking-widest uppercase text-xs">A Structured Operation for Daily Wins</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass p-10 hover:bg-white/5 transition-all duration-500 group">
-                    <div class="text-4xl font-serif italic mb-12 opacity-20 group-hover:opacity-100 transition-opacity">01</div>
-                    <h4 class="font-bold text-xs uppercase tracking-widest mb-4">The Subtraction Audit</h4>
-                    <p class="text-gray-400 text-sm leading-relaxed">Identify one friction point daily. Removing a negative is mathematically equal to adding a positive. 1 + (-1) = 2% Net Gain.</p>
-                </div>
-
-                <div class="glass p-10 hover:bg-white/5 transition-all duration-500 group">
-                    <div class="text-4xl font-serif italic mb-12 opacity-20 group-hover:opacity-100 transition-opacity">02</div>
-                    <h4 class="font-bold text-xs uppercase tracking-widest mb-4">180m Deep Work</h4>
-                    <p class="text-gray-400 text-sm leading-relaxed">Non-negotiable blocks of high-leverage creation. Stacking permanent wins that move the needle by exactly 1%.</p>
-                </div>
-
-                <div class="glass p-10 hover:bg-white/5 transition-all duration-500 group">
-                    <div class="text-4xl font-serif italic mb-12 opacity-20 group-hover:opacity-100 transition-opacity">03</div>
-                    <h4 class="font-bold text-xs uppercase tracking-widest mb-4">Evidence Mapping</h4>
-                    <p class="text-gray-500 text-sm leading-relaxed">Journaling not for "feelings," but for proof. A daily catalog of evidence that you are who you say you are.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer class="py-32 text-center opacity-20">
-        <div class="font-serif italic text-3xl mb-8">Refining daily.</div>
-        <div class="text-[9px] tracking-[0.8em] uppercase">Est. 2026 // Vol 1.0</div>
+    <footer class="py-20 text-center glass border-t border-white/5 opacity-40">
+        <p class="text-[9px] tracking-[0.8em] uppercase font-bold">Project 365 // Non-Negotiable // 2026</p>
     </footer>
 
 </body>
