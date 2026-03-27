@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 365 | (n)1.1</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#0A0A0A',
+                        chalk: '#F9F9F9',
+                    },
+                    fontFamily: {
+                        serif: ['Instrument Serif', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #0A0A0A; color: #F9F9F9; scroll-behavior: smooth; }
+        .formula-glow { text-shadow: 0 0 40px rgba(249, 249, 249, 0.1); }
+        
+        /* The "Luxury Grain" Texture */
+        .grain::before {
+            content: "";
+            position: fixed; inset: 0; width: 100%; height: 100%;
+            opacity: 0.03; z-index: 50; pointer-events: none;
+            background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
+        }
+
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="grain selection:bg-chalk selection:text-obsidian">
+
+    <section class="min-h-screen flex flex-col justify-center px-10 md:px-24" 
+             x-data="{ show: false }" x-init="setTimeout(() => show = true, 100)">
+        <div x-show="show" x-transition:enter="transition ease-out duration-1000" 
+             x-transition:enter-start="opacity-0 translate-y-10" x-transition:enter-end="opacity-100 translate-y-0">
+            
+            <p class="text-[10px] tracking-[0.5em] uppercase mb-8 opacity-40 font-semibold">Project 365 / Vol. 01</p>
+            
+            <h1 class="font-serif text-[20vw] md:text-[14vw] leading-[0.8] formula-glow tracking-tighter">
+                (n)<sup class="italic text-[8vw] md:text-[6vw] ml-2">1.1</sup>
+            </h1>
+
+            <div class="mt-20 flex flex-col md:flex-row md:items-end justify-between gap-12">
+                <p class="max-w-md text-lg font-light leading-relaxed text-gray-400">
+                    The philosophy of the asymptote. Small, daily variations in input that lead to 
+                    insurmountable leads in output.
+                </p>
+                <div class="font-serif italic text-2xl border-b border-white/10 pb-4">
+                    "Stacking bricks for a house you can't see yet."
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-48 px-10 md:px-24 bg-chalk text-obsidian"
+             x-data="{ shown: false }" x-intersect="shown = true">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-24 items-start"
+             x-show="shown" x-transition:enter="transition ease-out duration-1000 delay-200"
+             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+            
+            <h2 class="font-serif text-7xl md:text-9xl leading-none tracking-tighter">
+                Latent <br><i>Potential.</i>
+            </h2>
+            
+            <div class="space-y-10 text-xl leading-relaxed max-w-lg pt-4">
+                <p>Progress is a power law. The <strong>n<sup>1.1</sup></strong> formula represents the compounding nature of mastery where 1% isn't just added—it's <i>powered</i>.</p>
+                <p class="text-gray-500 italic">"Most people fail because they treat self-improvement as a feeling. We treat it as an operation."</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-48 px-10 md:px-24 border-t border-white/5">
+        <div class="max-w-4xl">
+            <h2 class="font-serif text-6xl mb-24 italic">Project 120 Protocols.</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-0.5 bg-white/10 border border-white/10">
+                <div class="p-12 bg-obsidian group hover:bg-[#111] transition-colors">
+                    <h4 class="font-bold text-[10px] tracking-[0.3em] uppercase mb-8 text-gray-600">01 / AM Audit</h4>
+                    <p class="text-sm opacity-60 leading-loose">Dream logs and the subtraction rule. Identify the 1% friction holding you back and delete it.</p>
+                </div>
+                <div class="p-12 bg-obsidian group hover:bg-[#111] transition-colors">
+                    <h4 class="font-bold text-[10px] tracking-[0.3em] uppercase mb-8 text-gray-600">02 / Deep Work</h4>
+                    <p class="text-sm opacity-60 leading-loose">3-hour non-negotiable blocks. Stacking the permanent wins that create your future identity.</p>
+                </div>
+                <div class="p-12 bg-obsidian group hover:bg-[#111] transition-colors">
+                    <h4 class="font-bold text-[10px] tracking-[0.3em] uppercase mb-8 text-gray-600">03 / PM Gratitude</h4>
+                    <p class="text-sm opacity-60 leading-loose">Reflecting on the bricks laid today. Evidence-based confidence through daily winning.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-24 text-center border-t border-white/5 opacity-30 text-[9px] tracking-[0.8em] uppercase">
+        Continuous Refinement // Established 2026
+    </footer>
+
+    <script src="https://unpkg.com/@alpinejs/intersect@3.x.x/dist/cdn.min.js" defer></script>
+</body>
+</html>
