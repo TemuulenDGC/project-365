@@ -1,103 +1,101 @@
 <!DOCTYPE html>
-<html lang="en" x-data="project365()" x-init="init()">
+<html lang="en" x-data="p365()">
 <head>
     <meta charset="UTF-8">
-    <title>P365 // COMMAND_MAX_V13</title>
+    <title>PROJECT_365 // ELITE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #050505; color: #e5e5e5; font-family: 'JetBrains Mono', monospace; }
-        .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); }
-        .brick { width: 14px; height: 14px; border-radius: 2px; transition: 0.2s; cursor: pointer; }
-        .brick-none { background: rgba(255,255,255,0.05); }
-        .brick-win { background: #ffffff; box-shadow: 0 0 8px #fff; }
-        .brick-friction { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+        [x-cloak] { display: none !important; }
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        .grid-cell { width: 12px; height: 12px; border-radius: 2px; }
+        .win { background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.4); }
+        .empty { background: rgba(255,255,255,0.05); }
     </style>
 </head>
-<body class="p-8">
-
-    <div class="flex justify-between items-center mb-12 glass p-4 rounded-lg">
-        <div class="flex items-center gap-6">
-            <h1 class="text-xs font-black tracking-[.5em] text-blue-500">P365_OPERATING_SYSTEM</h1>
-            <div class="h-4 w-[1px] bg-white/10"></div>
-            <div class="text-[10px] opacity-50">STREAK: <span class="text-white" x-text="history.length"></span></div>
-        </div>
-        <div class="flex gap-4">
-            <button @click="exportVault()" class="text-[9px] border border-white/10 px-3 py-1 hover:bg-white hover:text-black">EXPORT_JSON</button>
-            <button @click="importVault()" class="text-[9px] border border-white/10 px-3 py-1 hover:bg-white hover:text-black">IMPORT_JSON</button>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-12 gap-8">
-        <div class="col-span-12 lg:col-span-4 space-y-6">
-            <div class="glass p-6">
-                <label class="text-[10px] uppercase tracking-widest opacity-30 mb-4 block">01_Daily_Target</label>
-                <input x-model="current.mustDo" class="w-full bg-black border-b border-white/20 p-2 text-sm outline-none focus:border-blue-500" placeholder="One non-negotiable win...">
+<body x-init="init()">
+    <div class="max-w-5xl mx-auto px-6 py-20">
+        
+        <div class="flex justify-between items-end mb-20 border-b border-white/10 pb-10">
+            <div>
+                <h1 class="text-4xl font-black italic tracking-tighter">PROJECT_365</h1>
+                <p class="text-[10px] uppercase tracking-[0.4em] opacity-40 mt-2">Personal Velocity Operating System</p>
             </div>
-
-            <div class="glass p-6">
-                <label class="text-[10px] uppercase tracking-widest opacity-30 mb-4 block">02_Forensic_Debug</label>
-                <select x-model="current.frictionLevel" class="w-full bg-black text-[10px] mb-4 border border-white/10 p-2 outline-none">
-                    <option value="low">Low Friction (Smooth)</option>
-                    <option value="high">High Friction (Bug Identified)</option>
-                </select>
-                <textarea x-model="current.friction" class="w-full bg-black border border-white/10 p-4 text-xs h-24 outline-none focus:border-red-500/50" placeholder="What slowed you down today?"></textarea>
+            <div class="text-right">
+                <div class="text-5xl font-black tabular-nums" x-text="Math.round((history.length/365)*100) + '%'"></div>
+                <div class="text-[9px] uppercase opacity-30">Total Vector Completion</div>
             </div>
-
-            <button @click="archive()" class="w-full py-4 bg-white text-black font-black text-xs tracking-[.3em] hover:bg-blue-600 hover:text-white transition">ARCHIVE_DAY_EVIDENCE</button>
         </div>
 
-        <div class="col-span-12 lg:col-span-8 space-y-6">
-            <div class="glass p-8 min-h-[400px]">
-                <div class="flex justify-between items-end mb-8">
-                    <h2 class="text-[10px] font-bold opacity-30 tracking-widest">COMPOUND_WALL_VIZ</h2>
-                    <div class="text-[40px] font-black italic tracking-tighter" x-text="Math.round((history.length/365)*100) + '%'"></div>
-                </div>
-                
-                <div class="flex flex-wrap gap-2">
-                    <template x-for="(day, i) in 365" :key="i">
-                        <div @click="viewDay(i)" 
-                             class="brick" 
-                             :class="getBrickClass(i)"
-                             :title="history[i] ? history[i].date : 'Locked'"></div>
-                    </template>
-                </div>
+        <section class="mb-20">
+            <h2 class="text-[10px] uppercase opacity-30 mb-6 tracking-widest">Active Objective</h2>
+            <div class="flex items-center gap-6 bg-white/5 p-8 rounded-xl border border-white/10">
+                <input type="checkbox" x-model="todayDone" class="w-10 h-10 accent-white">
+                <h3 class="text-2xl font-bold" :class="todayDone ? 'line-through opacity-20' : ''" x-text="getCurrentGoal()"></h3>
             </div>
-            
-            <div class="glass p-6 border-l-4 border-blue-500">
-                <h3 class="text-[9px] font-bold opacity-50 mb-4">COMMANDER_AI_FEED</h3>
-                <p class="text-[11px] italic text-blue-200/70" x-text="aiOutput || 'Ready for telemetry analysis...'"></p>
-                <button @click="runOllama()" class="mt-4 text-[9px] opacity-40 hover:opacity-100 underline">GENERATE_STRATEGIC_REPORT</button>
+        </section>
+
+        <section class="mb-20">
+            <h2 class="text-[10px] uppercase opacity-30 mb-6 tracking-widest">Compounding Evidence (365 Days)</h2>
+            <div class="flex flex-wrap gap-1.5">
+                <template x-for="i in 365">
+                    <div class="grid-cell" :class="i <= history.length ? 'win' : 'empty'"></div>
+                </template>
             </div>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+            <div class="space-y-4">
+                <label class="text-[10px] uppercase opacity-30">What was the friction today?</label>
+                <textarea x-model="friction" class="w-full bg-white/5 border border-white/10 p-4 h-32 rounded-lg outline-none focus:border-white/40" placeholder="Be honest. What slowed you down?"></textarea>
+            </div>
+            <div class="space-y-4">
+                <label class="text-[10px] uppercase opacity-30">Tomorrow's One Win</label>
+                <textarea x-model="nextGoal" class="w-full bg-white/5 border border-white/10 p-4 h-32 rounded-lg outline-none focus:border-white/40" placeholder="Set the target for tomorrow..."></textarea>
+            </div>
+        </div>
+
+        <button @click="archive()" class="w-full py-5 bg-white text-black font-black uppercase tracking-widest rounded-lg hover:invert transition-all">Archive Day & Sync Tomorrow</button>
+        
+        <div class="mt-20 pt-10 border-t border-white/5 flex gap-6">
+            <button @click="exportData()" class="text-[9px] opacity-30 hover:opacity-100 uppercase">Export_Vault</button>
+            <button @click="importData()" class="text-[9px] opacity-30 hover:opacity-100 uppercase">Import_Vault</button>
         </div>
     </div>
 
     <script>
-        function project365() {
+        function p365() {
             return {
                 history: [],
-                current: { mustDo: '', friction: '', frictionLevel: 'low' },
-                aiOutput: '',
-                init() { this.history = JSON.parse(localStorage.getItem('p365_v13') || '[]'); },
+                friction: '',
+                nextGoal: '',
+                todayDone: false,
+                init() {
+                    this.history = JSON.parse(localStorage.getItem('p365_elite') || '[]');
+                },
+                getCurrentGoal() {
+                    if (this.history.length === 0) return "Set your first goal below.";
+                    return this.history[this.history.length - 1].nextGoal;
+                },
                 archive() {
-                    if(!this.current.mustDo) return alert("TARGET_MISSING");
-                    this.history.push({ ...this.current, date: new Date().toLocaleDateString() });
-                    localStorage.setItem('p365_v13', JSON.stringify(this.history));
-                    this.current = { mustDo: '', friction: '', frictionLevel: 'low' };
+                    if(!this.nextGoal) return alert("You must set a goal for tomorrow.");
+                    this.history.push({
+                        date: new Date().toLocaleDateString(),
+                        friction: this.friction,
+                        nextGoal: this.nextGoal,
+                        completed: this.todayDone
+                    });
+                    localStorage.setItem('p365_elite', JSON.stringify(this.history));
+                    location.reload(); // Refresh to sync the HUD
                 },
-                getBrickClass(i) {
-                    if (!this.history[i]) return 'brick-none';
-                    return this.history[i].frictionLevel === 'high' ? 'brick-friction' : 'brick-win';
-                },
-                exportVault() {
+                exportData() {
                     const data = JSON.stringify(this.history);
                     const blob = new Blob([data], {type: 'application/json'});
-                    const url = window.URL.createObjectURL(blob);
+                    const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.href = url; a.download = 'p365_vault_backup.json'; a.click();
-                },
-                // Additional AI and logic methods go here...
+                    a.href = url; a.download = 'p365_vault.json'; a.click();
+                }
             }
         }
     </script>
