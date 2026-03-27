@@ -3,134 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P365 // OPERATING SYSTEM</title>
+    <title>P120 // COMMAND</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
-        .border-subtle { border: 1px solid rgba(255,255,255,0.1); }
-        .bg-card { background: rgba(255,255,255,0.03); }
+        body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); }
+        .progress-bar { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body x-data="projectOS()" x-init="init()">
+<body x-data="project120()" x-init="init()">
 
-    <nav class="fixed top-0 w-full p-6 flex justify-between items-center border-b border-white/10 bg-black/80 backdrop-blur-md z-50">
-        <div class="font-black tracking-tighter text-xl underline decoration-2">P365 // COMMAND</div>
-        <div class="flex gap-10 text-[10px] font-bold tracking-[0.2em] opacity-60">
-            <div>DAY <span class="text-white" x-text="day"></span>/365</div>
-            <div>STATUS: <span class="text-green-500">OPERATIONAL</span></div>
+    <nav class="fixed top-0 w-full p-6 glass backdrop-blur-xl z-50 flex flex-col gap-2">
+        <div class="flex justify-between items-end">
+            <span class="font-black tracking-tighter text-xl italic underline decoration-white/20">P120/OS</span>
+            <span class="text-[10px] font-bold tracking-widest opacity-40 uppercase" x-text="`DAY ${currentDay} / 120` "></span>
+        </div>
+        <div class="w-full h-1 bg-white/5 overflow-hidden rounded-full">
+            <div class="h-full bg-white progress-bar" :style="`width: ${(currentDay/120)*100}%`"></div>
         </div>
     </nav>
 
-    <main class="pt-32 px-6 max-w-6xl mx-auto space-y-12 pb-20">
+    <main class="pt-32 px-6 max-w-4xl mx-auto space-y-8 pb-24">
         
-        <section class="p-12 border-subtle bg-card rounded-sm text-center">
-            <h2 class="text-[10px] tracking-[0.4em] uppercase opacity-40 mb-10">Deep Work Protocol // 180 Minutes</h2>
-            <div class="text-9xl font-black tracking-tighter mb-12 tabular-nums" x-text="formatTime()">180:00</div>
+        <section class="glass p-8 rounded-lg space-y-6">
+            <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                <h2 class="text-xs font-black tracking-[0.3em] uppercase opacity-50 italic">AM // Identity Frame</h2>
+                <span class="text-[10px] opacity-20" x-text="todayDate"></span>
+            </div>
             
-            <div class="flex justify-center gap-4">
-                <button @click="toggleTimer()" 
-                        class="px-12 py-4 bg-white text-black font-black uppercase text-xs hover:bg-gray-200 transition"
-                        x-text="running ? 'PAUSE' : 'INITIATE BLOCK'"></button>
-                <button @click="resetTimer()" class="px-8 py-4 border-subtle text-xs font-bold uppercase opacity-40 hover:opacity-100">Reset</button>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest block mb-2 opacity-40">Dream Log / Subconscious</label>
+                    <textarea x-model="logs.morning.dream" @input="save()" class="w-full bg-white/5 border border-white/10 p-4 text-sm outline-none focus:border-white/30 h-24" placeholder="Last night's dream..."></textarea>
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest block mb-2 opacity-40">3 Gratitudes (Evidence of Abundance)</label>
+                    <template x-for="(g, index) in logs.morning.gratitude" :key="index">
+                        <input type="text" x-model="logs.morning.gratitude[index]" @input="save()" 
+                               class="w-full bg-white/5 border border-white/10 p-3 text-sm mb-2 outline-none focus:border-white/30" :placeholder="`Gratitude #${index + 1}`">
+                    </template>
+                </div>
             </div>
         </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <section class="glass p-8 rounded-lg space-y-6">
+            <h2 class="text-xs font-black tracking-[0.3em] uppercase opacity-50 italic border-b border-white/5 pb-4">PM // The 1% Audit</h2>
             
-            <section class="space-y-6">
-                <div class="flex justify-between items-baseline">
-                    <h3 class="font-black text-2xl uppercase tracking-tighter">Friction Subtraction</h3>
-                    <span class="text-[9px] opacity-30">REMOVAL > ADDITION</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <label class="text-[10px] uppercase tracking-widest block opacity-40">One thing I should NOT do tomorrow</label>
+                    <textarea x-model="logs.evening.dontDo" @input="save()" class="w-full bg-white/5 border border-red-500/10 p-4 text-sm outline-none focus:border-red-500/30 h-20" placeholder="A mistake to fix..."></textarea>
                 </div>
-                
-                <div class="flex gap-2">
-                    <input type="text" x-model="newFriction" @keydown.enter="addFriction()" 
-                           placeholder="Describe the resistance..." 
-                           class="w-full bg-white/5 border-subtle p-4 text-sm outline-none focus:border-white/40">
-                    <button @click="addFriction()" class="p-4 bg-white/10 hover:bg-white/20 font-bold">+</button>
+                <div class="space-y-4">
+                    <label class="text-[10px] uppercase tracking-widest block opacity-40">One thing I MUST do tomorrow</label>
+                    <textarea x-model="logs.evening.mustDo" @input="save()" class="w-full bg-white/5 border border-green-500/10 p-4 text-sm outline-none focus:border-green-500/30 h-20" placeholder="A win to stack..."></textarea>
                 </div>
+            </div>
+        </section>
 
-                <div class="space-y-2">
-                    <template x-for="f in frictions" :key="f.id">
-                        <div class="p-4 border-subtle flex justify-between items-center group">
-                            <span class="text-sm opacity-70" x-text="f.text"></span>
-                            <button @click="removeFriction(f.id)" class="text-[10px] font-bold text-red-500 opacity-0 group-hover:opacity-100 transition">RESOLVED</button>
-                        </div>
-                    </template>
-                </div>
-            </section>
+        <section class="glass p-8 rounded-lg">
+            <h2 class="text-xs font-black tracking-[0.3em] uppercase opacity-50 italic border-b border-white/5 pb-4 mb-6">Tomorrow's Architecture</h2>
+            <div class="flex gap-2 mb-6">
+                <input type="text" x-model="newTask" @keydown.enter="addTask()" placeholder="Critical Task for tomorrow..." class="w-full bg-white/5 border border-white/10 p-3 text-sm outline-none">
+                <button @click="addTask()" class="px-6 bg-white text-black font-black text-[10px] uppercase tracking-widest">Add</button>
+            </div>
+            <div class="space-y-2">
+                <template x-for="(task, i) in logs.nextDayTasks" :key="task.id">
+                    <div class="flex items-center gap-4 p-4 border border-white/5 bg-white/[0.02] group">
+                        <input type="checkbox" x-model="task.done" @change="save()" class="w-4 h-4 accent-white bg-transparent border-white/20">
+                        <span class="text-sm flex-grow" :class="task.done ? 'line-through opacity-30' : 'opacity-80'" x-text="task.text"></span>
+                        <button @click="removeTask(task.id)" class="text-[9px] font-bold text-red-500 opacity-0 group-hover:opacity-100 uppercase">Remove</button>
+                    </div>
+                </template>
+            </div>
+        </section>
 
-            <section class="space-y-6">
-                <h3 class="font-black text-2xl uppercase tracking-tighter">Stack Links</h3>
-                <div class="grid grid-cols-1 gap-2">
-                    <a href="https://notion.so" target="_blank" class="p-6 border-subtle bg-card hover:bg-white hover:text-black transition flex justify-between items-center">
-                        <span class="font-bold text-sm tracking-widest uppercase italic">Notion // Operating System</span>
-                        <span class="text-xs">-></span>
-                    </a>
-                    <a href="https://obsidian.md" target="_blank" class="p-6 border-subtle bg-card hover:bg-white hover:text-black transition flex justify-between items-center">
-                        <span class="font-bold text-sm tracking-widest uppercase italic">Obsidian // Second Brain</span>
-                        <span class="text-xs">-></span>
-                    </a>
-                    <a href="https://github.com/TemuulenDGC" target="_blank" class="p-6 border-subtle bg-card hover:bg-white hover:text-black transition flex justify-between items-center">
-                        <span class="font-bold text-sm tracking-widest uppercase italic">GitHub // Commit Logic</span>
-                        <span class="text-xs">-></span>
-                    </a>
-                </div>
-            </section>
-
-        </div>
     </main>
 
     <script>
-        function projectOS() {
+        function project120() {
             return {
-                day: Math.floor((new Date() - new Date('2026-01-01')) / 86400000),
-                timer: 180 * 60,
-                running: false,
-                interval: null,
-                frictions: [],
-                newFriction: '',
-
+                currentDay: Math.floor((new Date() - new Date('2026-03-01')) / 86400000) || 1,
+                todayDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                newTask: '',
+                logs: {
+                    morning: { dream: '', gratitude: ['', '', ''] },
+                    evening: { dontDo: '', mustDo: '', reflection: '' },
+                    nextDayTasks: []
+                },
                 init() {
-                    this.frictions = JSON.parse(localStorage.getItem('p365_frictions') || '[]');
+                    const saved = localStorage.getItem('p120_v1');
+                    if (saved) this.logs = JSON.parse(saved);
                 },
-
-                formatTime() {
-                    let m = Math.floor(this.timer / 60);
-                    let s = this.timer % 60;
-                    return `${m}:${s < 10 ? '0' : ''}${s}`;
+                save() {
+                    localStorage.setItem('p120_v1', JSON.stringify(this.logs));
                 },
-
-                toggleTimer() {
-                    if (this.running) {
-                        clearInterval(this.interval);
-                    } else {
-                        this.interval = setInterval(() => {
-                            if (this.timer > 0) this.timer--;
-                        }, 1000);
-                    }
-                    this.running = !this.running;
+                addTask() {
+                    if(!this.newTask) return;
+                    this.logs.nextDayTasks.push({ id: Date.now(), text: this.newTask, done: false });
+                    this.save();
+                    this.newTask = '';
                 },
-
-                resetTimer() {
-                    clearInterval(this.interval);
-                    this.timer = 180 * 60;
-                    this.running = false;
-                },
-
-                addFriction() {
-                    if (this.newFriction.trim() === '') return;
-                    this.frictions.push({ id: Date.now(), text: this.newFriction });
-                    localStorage.setItem('p365_frictions', JSON.stringify(this.frictions));
-                    this.newFriction = '';
-                },
-
-                removeFriction(id) {
-                    this.frictions = this.frictions.filter(f => f.id !== id);
-                    localStorage.setItem('p365_frictions', JSON.stringify(this.frictions));
+                removeTask(id) {
+                    this.logs.nextDayTasks = this.logs.nextDayTasks.filter(t => t.id !== id);
+                    this.save();
                 }
             }
         }
