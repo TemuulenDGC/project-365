@@ -3,177 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROJECT 365 // CYBER-TRACKER</title>
+    <title>PROJECT 365 // CORE_SYSTEM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
-        body { font-family: 'Space Grotesk', sans-serif; background: #020617; }
-        .grid-container::-webkit-scrollbar { height: 6px; }
-        .grid-container::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .cell { width: 14px; height: 14px; border-radius: 2px; transition: all 0.2s ease; position: relative; }
-        .cell:hover { transform: scale(1.4); z-index: 20; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
-        .status-done { background: #22c55e; box-shadow: 0 0 5px rgba(34, 197, 94, 0.4); }
-        .status-miss { background: #ef4444; }
-        .status-none { background: #1e293b; }
-        .status-today { outline: 2px solid #3b82f6; outline-offset: 2px; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
+        body { font-family: 'Space Grotesk', sans-serif; background: #020617; color: #f8fafc; overflow-x: hidden; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(51, 65, 85, 0.4); }
+        .cell { width: 14px; height: 14px; border-radius: 3px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .status-done { background: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.4); border: 1px solid #4ade80; }
+        .status-none { background: #1e293b; border: 1px solid rgba(51, 65, 85, 0.3); }
+        .status-today { outline: 2px solid #3b82f6; outline-offset: 3px; transform: scale(1.1); }
+        .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
-<body class="text-slate-200 min-h-screen">
+<body class="min-h-screen selection:bg-blue-500/30">
 
-    <div class="max-w-6xl mx-auto p-4 lg:p-10">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-            <div>
-                <h1 class="text-4xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-                    PROJECT_365 <span class="text-xs font-mono text-slate-500">v2.0.1</span>
-                </h1>
-                <p class="text-slate-500 font-mono text-sm mt-1">SYSTEM_STATUS: <span class="text-emerald-500 uppercase">Operational</span></p>
+    <div id="authOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950">
+        <div class="glass p-10 rounded-[2.5rem] max-w-md w-full shadow-2xl border-t-blue-500/50">
+            <div class="mb-8">
+                <h2 id="authTitle" class="text-4xl font-bold tracking-tighter text-white">System Login</h2>
+                <p class="text-slate-400 text-sm mt-2">Connect to the central habit database.</p>
             </div>
-            
-            <div class="flex gap-4">
-                <div class="glass px-6 py-3 rounded-2xl text-center">
-                    <p class="text-xs uppercase text-slate-500 font-bold">Current Streak</p>
-                    <p class="text-2xl font-bold text-blue-400" id="streakVal">0</p>
-                </div>
-                <div class="glass px-6 py-3 rounded-2xl text-center">
-                    <p class="text-xs uppercase text-slate-500 font-bold">Consistency</p>
-                    <p class="text-2xl font-bold text-emerald-400" id="percentVal">0%</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass p-8 rounded-3xl mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="font-bold flex items-center gap-2">
-                    <i data-lucide="calendar"></i> ANNUAL_PROGRESS_GRID
-                </h2>
-                <div class="flex gap-2 text-[10px] uppercase font-bold text-slate-500">
-                    <span class="flex items-center gap-1"><div class="w-2 h-2 status-done"></div> Done</span>
-                    <span class="flex items-center gap-1"><div class="w-2 h-2 status-miss"></div> Missed</span>
-                </div>
-            </div>
-            
-            <div class="grid-container overflow-x-auto pb-4">
-                <div id="masterGrid" class="grid grid-flow-col grid-rows-7 gap-1.5 w-max">
-                    </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="glass p-6 rounded-2xl flex flex-col justify-between">
-                <div>
-                    <h3 class="font-bold mb-2 flex items-center gap-2"><i data-lucide="zap"></i> QUICK_ACTION</h3>
-                    <p class="text-sm text-slate-400 mb-4">Log progress for the current timestamp.</p>
-                </div>
-                <button onclick="logToday()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition">MARK TODAY AS DONE</button>
-            </div>
-
-            <div class="glass p-6 rounded-2xl flex flex-col justify-between">
-                <div>
-                    <h3 class="font-bold mb-2 flex items-center gap-2"><i data-lucide="database"></i> DATA_CONTROL</h3>
-                    <p class="text-sm text-slate-400 mb-4">Manage your local storage backup.</p>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="exportData()" class="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded-lg text-sm transition">EXPORT</button>
-                    <button onclick="resetData()" class="flex-1 bg-red-900/30 hover:bg-red-900/50 text-red-400 py-2 rounded-lg text-sm transition">WIPE</button>
-                </div>
-            </div>
-
-            <div class="glass p-6 rounded-2xl flex flex-col justify-between italic text-slate-500 text-sm">
-                <p>"The only difference between a master and a beginner is that the master has failed more times than the beginner has even tried."</p>
-                <p class="mt-4 text-xs font-mono">— SYSTEM_REF_365</p>
+            <div class="space-y-4">
+                <input type="email" id="email" placeholder="Access Email" class="w-full bg-slate-900/50 border border-slate-700 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 transition">
+                <input type="password" id="password" placeholder="Passkey" class="w-full bg-slate-900/50 border border-slate-700 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 transition">
+                <button onclick="handleAuth()" id="authBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-bold text-white shadow-lg shadow-blue-900/20 transition-all active:scale-95">INITIALIZE_SESSION</button>
+                <p class="text-center text-xs text-slate-500 cursor-pointer hover:text-blue-400 font-medium transition" onclick="toggleAuthMode()" id="authToggle">New operative? Register account</p>
             </div>
         </div>
     </div>
 
-    <script>
-        // Init Lucide Icons
-        lucide.createIcons();
+    <div id="dashboard" class="hidden opacity-0 transition-opacity duration-700 max-w-6xl mx-auto p-6 lg:p-12">
+        
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+            <div>
+                <h1 class="text-5xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-white to-slate-500">PROJECT_365</h1>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <p id="userEmail" class="text-xs font-mono text-slate-400 uppercase tracking-widest"></p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="logout()" class="glass px-6 py-3 rounded-xl text-xs font-bold hover:bg-red-500/10 hover:text-red-400 transition border-red-500/20">TERMINATE_SESSION</button>
+            </div>
+        </header>
 
-        const grid = document.getElementById('masterGrid');
-        const totalDays = 365;
-        let userData = JSON.parse(localStorage.getItem('beast_365_data')) || {};
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            <div class="space-y-6">
+                <div class="glass p-8 rounded-[2rem]">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Consistency Score</p>
+                    <p id="percentVal" class="text-5xl font-black text-white">0%</p>
+                    <div class="w-full bg-slate-800 h-1.5 mt-4 rounded-full overflow-hidden">
+                        <div id="progressBar" class="bg-blue-500 h-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="glass p-8 rounded-[2rem] border-l-4 border-l-orange-500">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Current Streak</p>
+                    <p id="streakVal" class="text-5xl font-black text-orange-500">0</p>
+                    <p class="text-[10px] text-slate-500 mt-2 font-mono">DAYS_UNBROKEN</p>
+                </div>
+            </div>
 
-        function getDayOfYear() {
-            const now = new Date();
-            const start = new Date(now.getFullYear(), 0, 0);
-            const diff = now - start;
-            const oneDay = 1000 * 60 * 60 * 24;
-            return Math.floor(diff / oneDay);
+            <div class="lg:col-span-3 glass p-8 rounded-[2rem] relative">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="font-bold text-slate-300 flex items-center gap-2">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i> ACTIVITY_MAP_2026
+                    </h3>
+                    <div class="flex gap-4 text-[10px] uppercase font-bold text-slate-500">
+                        <span class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 status-done"></div> SUCCESS</span>
+                        <span class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 status-none"></div> PENDING</span>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto pb-4">
+                    <div id="masterGrid" class="grid grid-flow-col grid-rows-7 gap-2 w-max">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="group relative">
+                <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-emerald-600 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                <button onclick="logToday()" class="relative w-full bg-slate-900 hover:bg-slate-800 border border-slate-700/50 py-10 rounded-[2.5rem] flex flex-col items-center justify-center transition-all active:scale-95">
+                    <i data-lucide="check-circle" class="w-12 h-12 text-emerald-500 mb-4"></i>
+                    <span class="text-2xl font-black tracking-tighter">EXECUTE DAILY TASK</span>
+                    <span class="text-xs text-slate-500 mt-2 uppercase tracking-widest font-mono">Timestamp: <span id="currentDate"></span></span>
+                </button>
+            </div>
+
+            <div class="glass p-10 rounded-[2.5rem] flex flex-col justify-center">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="p-3 bg-blue-500/10 rounded-2xl text-blue-400">
+                        <i data-lucide="target"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Active Objective</p>
+                        <input id="goalInput" onchange="updateGoal()" type="text" placeholder="Set your 365 goal..." class="bg-transparent border-none text-xl font-bold text-white outline-none w-full">
+                    </div>
+                </div>
+                <p class="text-sm text-slate-400 italic font-light">"Success is not final, failure is not fatal: it is the courage to continue that counts."</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAr-emCO1ubHaRu-b9BoRa_0J49BhdjaKc",
+            authDomain: "project-365-822d0.firebaseapp.com",
+            projectId: "project-365-822d0",
+            storageBucket: "project-365-822d0.firebasestorage.app",
+            messagingSenderId: "16828743993",
+            appId: "1:16828743993:web:ddaa3e1221de6b819868e8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let isRegistering = false;
+        let userData = { progress: {}, goal: "" };
+
+        // --- AUTH ---
+        window.toggleAuthMode = () => {
+            isRegistering = !isRegistering;
+            document.getElementById('authTitle').innerText = isRegistering ? "Access Granted" : "System Login";
+            document.getElementById('authBtn').innerText = isRegistering ? "CREATE ACCOUNT" : "INITIALIZE SESSION";
+            document.getElementById('authToggle').innerText = isRegistering ? "Have credentials? Login" : "New operative? Register";
+        };
+
+        window.handleAuth = async () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            if(!email || !pass) return alert("Fields required.");
+            try {
+                if (isRegistering) await createUserWithEmailAndPassword(auth, email, pass);
+                else await signInWithEmailAndPassword(auth, email, pass);
+            } catch (e) { alert(e.message); }
+        };
+
+        window.logout = () => signOut(auth);
+
+        onAuthStateChanged(auth, user => {
+            const dashboard = document.getElementById('dashboard');
+            if (user) {
+                currentUser = user;
+                document.getElementById('authOverlay').classList.add('hidden');
+                dashboard.classList.remove('hidden');
+                setTimeout(() => dashboard.style.opacity = '1', 100);
+                document.getElementById('userEmail').innerText = user.email;
+                syncData();
+            } else {
+                document.getElementById('authOverlay').classList.remove('hidden');
+                dashboard.classList.add('hidden');
+                dashboard.style.opacity = '0';
+            }
+        });
+
+        // --- CORE DATA ---
+        function syncData() {
+            onSnapshot(doc(db, "users", currentUser.uid), (doc) => {
+                if(doc.exists()) {
+                    userData = doc.data();
+                    document.getElementById('goalInput').value = userData.goal || "";
+                }
+                renderGrid();
+            });
+        }
+
+        window.logToday = async () => {
+            const todayIndex = getDayOfYear();
+            if(!userData.progress) userData.progress = {};
+            userData.progress[todayIndex] = 'done';
+            await saveToCloud();
+        };
+
+        window.updateGoal = async () => {
+            userData.goal = document.getElementById('goalInput').value;
+            await saveToCloud();
+        };
+
+        async function saveToCloud() {
+            await setDoc(doc(db, "users", currentUser.uid), userData);
         }
 
         function renderGrid() {
+            const grid = document.getElementById('masterGrid');
             grid.innerHTML = '';
             const today = getDayOfYear();
-
-            for (let i = 1; i <= totalDays; i++) {
+            
+            for (let i = 1; i <= 365; i++) {
                 const cell = document.createElement('div');
-                cell.className = 'cell status-none';
-                
-                if (userData[i] === 'done') cell.classList.add('status-done');
-                if (userData[i] === 'miss') cell.classList.add('status-miss');
-                if (i === today) cell.classList.add('status-today');
-
-                cell.title = `Day ${i}`;
-                cell.onclick = () => toggleDay(i);
+                cell.className = `cell ${userData.progress?.[i] === 'done' ? 'status-done' : 'status-none'}`;
+                if(i === today) cell.classList.add('status-today');
                 grid.appendChild(cell);
             }
             updateStats();
         }
 
-        function toggleDay(i) {
-            if (!userData[i]) userData[i] = 'done';
-            else if (userData[i] === 'done') userData[i] = 'miss';
-            else delete userData[i];
-            
-            save();
-            renderGrid();
-        }
-
-        function logToday() {
-            const today = getDayOfYear();
-            userData[today] = 'done';
-            save();
-            renderGrid();
-        }
-
-        function save() {
-            localStorage.setItem('beast_365_data', JSON.stringify(userData));
-        }
-
         function updateStats() {
-            const days = Object.values(userData).filter(v => v === 'done').length;
-            const percent = ((days / totalDays) * 100).toFixed(1);
+            const done = Object.values(userData.progress || {}).filter(v => v === 'done').length;
+            const percent = ((done/365)*100).toFixed(1);
             document.getElementById('percentVal').innerText = `${percent}%`;
+            document.getElementById('progressBar').style.width = `${percent}%`;
 
-            // Streak logic
+            // Calculate streak
             let streak = 0;
-            let current = getDayOfYear();
-            while (userData[current] === 'done') {
+            let check = getDayOfYear();
+            while(userData.progress?.[check] === 'done') {
                 streak++;
-                current--;
+                check--;
             }
             document.getElementById('streakVal').innerText = streak;
         }
 
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userData));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", "project_365_backup.json");
-            dlAnchorElem.click();
+        function getDayOfYear() {
+            const now = new Date();
+            return Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
         }
 
-        function resetData() {
-            if (confirm("CRITICAL: Wipe all data? This cannot be undone.")) {
-                localStorage.removeItem('beast_365_data');
-                userData = {};
-                renderGrid();
-            }
-        }
-
-        renderGrid();
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString();
+        lucide.createIcons();
     </script>
 </body>
 </html>
