@@ -1,103 +1,179 @@
 <!DOCTYPE html>
-<html lang="en" x-data="p365()">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PROJECT_365 // ELITE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT 365 // CYBER-TRACKER</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        [x-cloak] { display: none !important; }
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
-        .grid-cell { width: 12px; height: 12px; border-radius: 2px; }
-        .win { background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.4); }
-        .empty { background: rgba(255,255,255,0.05); }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+        body { font-family: 'Space Grotesk', sans-serif; background: #020617; }
+        .grid-container::-webkit-scrollbar { height: 6px; }
+        .grid-container::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .cell { width: 14px; height: 14px; border-radius: 2px; transition: all 0.2s ease; position: relative; }
+        .cell:hover { transform: scale(1.4); z-index: 20; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+        .status-done { background: #22c55e; box-shadow: 0 0 5px rgba(34, 197, 94, 0.4); }
+        .status-miss { background: #ef4444; }
+        .status-none { background: #1e293b; }
+        .status-today { outline: 2px solid #3b82f6; outline-offset: 2px; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
     </style>
 </head>
-<body x-init="init()">
-    <div class="max-w-5xl mx-auto px-6 py-20">
-        
-        <div class="flex justify-between items-end mb-20 border-b border-white/10 pb-10">
+<body class="text-slate-200 min-h-screen">
+
+    <div class="max-w-6xl mx-auto p-4 lg:p-10">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
             <div>
-                <h1 class="text-4xl font-black italic tracking-tighter">PROJECT_365</h1>
-                <p class="text-[10px] uppercase tracking-[0.4em] opacity-40 mt-2">Personal Velocity Operating System</p>
+                <h1 class="text-4xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+                    PROJECT_365 <span class="text-xs font-mono text-slate-500">v2.0.1</span>
+                </h1>
+                <p class="text-slate-500 font-mono text-sm mt-1">SYSTEM_STATUS: <span class="text-emerald-500 uppercase">Operational</span></p>
             </div>
-            <div class="text-right">
-                <div class="text-5xl font-black tabular-nums" x-text="Math.round((history.length/365)*100) + '%'"></div>
-                <div class="text-[9px] uppercase opacity-30">Total Vector Completion</div>
-            </div>
-        </div>
-
-        <section class="mb-20">
-            <h2 class="text-[10px] uppercase opacity-30 mb-6 tracking-widest">Active Objective</h2>
-            <div class="flex items-center gap-6 bg-white/5 p-8 rounded-xl border border-white/10">
-                <input type="checkbox" x-model="todayDone" class="w-10 h-10 accent-white">
-                <h3 class="text-2xl font-bold" :class="todayDone ? 'line-through opacity-20' : ''" x-text="getCurrentGoal()"></h3>
-            </div>
-        </section>
-
-        <section class="mb-20">
-            <h2 class="text-[10px] uppercase opacity-30 mb-6 tracking-widest">Compounding Evidence (365 Days)</h2>
-            <div class="flex flex-wrap gap-1.5">
-                <template x-for="i in 365">
-                    <div class="grid-cell" :class="i <= history.length ? 'win' : 'empty'"></div>
-                </template>
-            </div>
-        </section>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
-            <div class="space-y-4">
-                <label class="text-[10px] uppercase opacity-30">What was the friction today?</label>
-                <textarea x-model="friction" class="w-full bg-white/5 border border-white/10 p-4 h-32 rounded-lg outline-none focus:border-white/40" placeholder="Be honest. What slowed you down?"></textarea>
-            </div>
-            <div class="space-y-4">
-                <label class="text-[10px] uppercase opacity-30">Tomorrow's One Win</label>
-                <textarea x-model="nextGoal" class="w-full bg-white/5 border border-white/10 p-4 h-32 rounded-lg outline-none focus:border-white/40" placeholder="Set the target for tomorrow..."></textarea>
+            
+            <div class="flex gap-4">
+                <div class="glass px-6 py-3 rounded-2xl text-center">
+                    <p class="text-xs uppercase text-slate-500 font-bold">Current Streak</p>
+                    <p class="text-2xl font-bold text-blue-400" id="streakVal">0</p>
+                </div>
+                <div class="glass px-6 py-3 rounded-2xl text-center">
+                    <p class="text-xs uppercase text-slate-500 font-bold">Consistency</p>
+                    <p class="text-2xl font-bold text-emerald-400" id="percentVal">0%</p>
+                </div>
             </div>
         </div>
 
-        <button @click="archive()" class="w-full py-5 bg-white text-black font-black uppercase tracking-widest rounded-lg hover:invert transition-all">Archive Day & Sync Tomorrow</button>
-        
-        <div class="mt-20 pt-10 border-t border-white/5 flex gap-6">
-            <button @click="exportData()" class="text-[9px] opacity-30 hover:opacity-100 uppercase">Export_Vault</button>
-            <button @click="importData()" class="text-[9px] opacity-30 hover:opacity-100 uppercase">Import_Vault</button>
+        <div class="glass p-8 rounded-3xl mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-bold flex items-center gap-2">
+                    <i data-lucide="calendar"></i> ANNUAL_PROGRESS_GRID
+                </h2>
+                <div class="flex gap-2 text-[10px] uppercase font-bold text-slate-500">
+                    <span class="flex items-center gap-1"><div class="w-2 h-2 status-done"></div> Done</span>
+                    <span class="flex items-center gap-1"><div class="w-2 h-2 status-miss"></div> Missed</span>
+                </div>
+            </div>
+            
+            <div class="grid-container overflow-x-auto pb-4">
+                <div id="masterGrid" class="grid grid-flow-col grid-rows-7 gap-1.5 w-max">
+                    </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="glass p-6 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold mb-2 flex items-center gap-2"><i data-lucide="zap"></i> QUICK_ACTION</h3>
+                    <p class="text-sm text-slate-400 mb-4">Log progress for the current timestamp.</p>
+                </div>
+                <button onclick="logToday()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition">MARK TODAY AS DONE</button>
+            </div>
+
+            <div class="glass p-6 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold mb-2 flex items-center gap-2"><i data-lucide="database"></i> DATA_CONTROL</h3>
+                    <p class="text-sm text-slate-400 mb-4">Manage your local storage backup.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="exportData()" class="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded-lg text-sm transition">EXPORT</button>
+                    <button onclick="resetData()" class="flex-1 bg-red-900/30 hover:bg-red-900/50 text-red-400 py-2 rounded-lg text-sm transition">WIPE</button>
+                </div>
+            </div>
+
+            <div class="glass p-6 rounded-2xl flex flex-col justify-between italic text-slate-500 text-sm">
+                <p>"The only difference between a master and a beginner is that the master has failed more times than the beginner has even tried."</p>
+                <p class="mt-4 text-xs font-mono">— SYSTEM_REF_365</p>
+            </div>
         </div>
     </div>
 
     <script>
-        function p365() {
-            return {
-                history: [],
-                friction: '',
-                nextGoal: '',
-                todayDone: false,
-                init() {
-                    this.history = JSON.parse(localStorage.getItem('p365_elite') || '[]');
-                },
-                getCurrentGoal() {
-                    if (this.history.length === 0) return "Set your first goal below.";
-                    return this.history[this.history.length - 1].nextGoal;
-                },
-                archive() {
-                    if(!this.nextGoal) return alert("You must set a goal for tomorrow.");
-                    this.history.push({
-                        date: new Date().toLocaleDateString(),
-                        friction: this.friction,
-                        nextGoal: this.nextGoal,
-                        completed: this.todayDone
-                    });
-                    localStorage.setItem('p365_elite', JSON.stringify(this.history));
-                    location.reload(); // Refresh to sync the HUD
-                },
-                exportData() {
-                    const data = JSON.stringify(this.history);
-                    const blob = new Blob([data], {type: 'application/json'});
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url; a.download = 'p365_vault.json'; a.click();
-                }
+        // Init Lucide Icons
+        lucide.createIcons();
+
+        const grid = document.getElementById('masterGrid');
+        const totalDays = 365;
+        let userData = JSON.parse(localStorage.getItem('beast_365_data')) || {};
+
+        function getDayOfYear() {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            const diff = now - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            return Math.floor(diff / oneDay);
+        }
+
+        function renderGrid() {
+            grid.innerHTML = '';
+            const today = getDayOfYear();
+
+            for (let i = 1; i <= totalDays; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell status-none';
+                
+                if (userData[i] === 'done') cell.classList.add('status-done');
+                if (userData[i] === 'miss') cell.classList.add('status-miss');
+                if (i === today) cell.classList.add('status-today');
+
+                cell.title = `Day ${i}`;
+                cell.onclick = () => toggleDay(i);
+                grid.appendChild(cell);
+            }
+            updateStats();
+        }
+
+        function toggleDay(i) {
+            if (!userData[i]) userData[i] = 'done';
+            else if (userData[i] === 'done') userData[i] = 'miss';
+            else delete userData[i];
+            
+            save();
+            renderGrid();
+        }
+
+        function logToday() {
+            const today = getDayOfYear();
+            userData[today] = 'done';
+            save();
+            renderGrid();
+        }
+
+        function save() {
+            localStorage.setItem('beast_365_data', JSON.stringify(userData));
+        }
+
+        function updateStats() {
+            const days = Object.values(userData).filter(v => v === 'done').length;
+            const percent = ((days / totalDays) * 100).toFixed(1);
+            document.getElementById('percentVal').innerText = `${percent}%`;
+
+            // Streak logic
+            let streak = 0;
+            let current = getDayOfYear();
+            while (userData[current] === 'done') {
+                streak++;
+                current--;
+            }
+            document.getElementById('streakVal').innerText = streak;
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userData));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "project_365_backup.json");
+            dlAnchorElem.click();
+        }
+
+        function resetData() {
+            if (confirm("CRITICAL: Wipe all data? This cannot be undone.")) {
+                localStorage.removeItem('beast_365_data');
+                userData = {};
+                renderGrid();
             }
         }
+
+        renderGrid();
     </script>
 </body>
 </html>
